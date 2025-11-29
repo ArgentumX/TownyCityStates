@@ -24,6 +24,7 @@ configurations {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
     compileOnly("com.palmergames.bukkit.towny:towny:0.102.0.0")
+    implementation 'com.google.inject:guice:5.0.1'
 
     // for coping to run/plugins
     townyPlugin("com.palmergames.bukkit.towny:towny:0.102.0.0")
