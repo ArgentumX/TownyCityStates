@@ -1,0 +1,5 @@
+name: TownyCityStates
+version: '1.0-SNAPSHOT'
+main: com.argemtum.townyCityStates.TownyCityStates
+api-version: '1.21'
+depend: [Towny]
