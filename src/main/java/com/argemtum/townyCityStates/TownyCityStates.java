@@ -1,5 +1,6 @@
 package com.argemtum.townyCityStates;
 
+import com.argemtum.townyCityStates.commands.TownyCityStatesAdminCommand;
 import com.argemtum.townyCityStates.di.PluginModule;
 import com.argemtum.townyCityStates.objects.CityState;
 import com.argemtum.townyCityStates.repositories.abstraction.ICityStateRepository;
@@ -8,6 +9,7 @@ import com.argemtum.townyCityStates.repositories.abstraction.ILocalizationReposi
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.bukkit.Bukkit;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class TownyCityStates extends JavaPlugin {
@@ -26,6 +28,17 @@ public final class TownyCityStates extends JavaPlugin {
 
         ICityStateRepository csRepo = injector.getInstance(ICityStateRepository.class);
         csRepo.loadAll();
+
+        // Must be after locale initialization
+        registerCommands();
+    }
+
+    private void registerCommands(){
+        // tcs_admin
+        TownyCityStatesAdminCommand tcsAdminExecutor = injector.getInstance(TownyCityStatesAdminCommand.class);
+        PluginCommand tcsAdminCommand = getCommand("tcs_admin");
+        tcsAdminCommand.setExecutor(tcsAdminExecutor);
+        tcsAdminCommand.setTabCompleter(tcsAdminExecutor);
     }
 
     @Override

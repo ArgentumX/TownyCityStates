@@ -3,3 +3,12 @@ version: '1.0-SNAPSHOT'
 main: com.argemtum.townyCityStates.TownyCityStates
 api-version: '1.21'
 depend: [Towny, WorldGuard]
+authors: [Argentum]
+commands:
+  tcs_admin:
+    aliases: [tcsa]
+    description: towny city states admin command
+permissions:
+  tcs.admin:
+    description: User is able to use /tcs_admin
+    default: false

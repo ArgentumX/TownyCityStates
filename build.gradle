@@ -82,10 +82,13 @@ tasks.register("downloadWG"){
     }
 }
 
-tasks.named("runServer") {
+tasks.register("loadPlugins"){
     dependsOn("copyTowny")
-    dependsOn("downloadWG")
     dependsOn("downloadWE")
+    dependsOn("downloadWG")
+}
+
+tasks.named("runServer") {
     dependsOn("shadowJar")
     minecraftVersion("1.21")
 }
