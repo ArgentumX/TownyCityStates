@@ -38,9 +38,10 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
     compileOnly("com.palmergames.bukkit.towny:towny:0.102.0.0")
     compileOnly('com.sk89q.worldguard:worldguard-bukkit:7.0.11')
+    compileOnly('com.sk89q.worldedit:worldedit-bukkit:7.3.6') // Updated to a stable version with known distribution JAR
     implementation 'com.google.inject:guice:7.0.0'
 
-    // for coping to run/plugins
+    // for copying to run/plugins
     townyPlugin("com.palmergames.bukkit.towny:towny:0.102.0.0")
 }
 
@@ -59,9 +60,32 @@ tasks.register("copyTowny", Copy) {
     into layout.projectDirectory.dir("run/plugins")
 }
 
+tasks.register("downloadWE") {
+    doLast {
+        def dir = layout.projectDirectory.dir("run/plugins")
+        def file = new File(dir.asFile, "WorldEdit.jar")
+        if (!file.exists()) {
+            file.parentFile.mkdirs()
+            file.bytes = new URL("https://cdn.modrinth.com/data/1u6JkXh5/versions/yAujLUIK/worldedit-bukkit-7.3.6.jar").bytes
+        }
+    }
+}
+
+tasks.register("downloadWG"){
+    doLast {
+        def dir = layout.projectDirectory.dir("run/plugins")
+        def file = new File(dir.asFile, "WorldGuard.jar")
+        if (!file.exists()) {
+            file.parentFile.mkdirs()
+            file.bytes = new URL("https://cdn.modrinth.com/data/DKY9btbd/versions/tRzURjVY/worldguard-bukkit-7.0.11-dist.jar").bytes
+        }
+    }
+}
 
 tasks.named("runServer") {
     dependsOn("copyTowny")
+    dependsOn("downloadWG")
+    dependsOn("downloadWE")
     dependsOn("shadowJar")
     minecraftVersion("1.21")
 }

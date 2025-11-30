@@ -4,6 +4,7 @@ import com.argemtum.townyCityStates.di.PluginModule;
 import com.argemtum.townyCityStates.objects.CityState;
 import com.argemtum.townyCityStates.repositories.abstraction.ICityStateRepository;
 import com.argemtum.townyCityStates.repositories.abstraction.IConfigRepository;
+import com.argemtum.townyCityStates.repositories.abstraction.ILocalizationRepository;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.bukkit.Bukkit;
@@ -17,11 +18,14 @@ public final class TownyCityStates extends JavaPlugin {
         injector = Guice.createInjector(new PluginModule(this));
 
         // loading data
-        ICityStateRepository csRepo = injector.getInstance(ICityStateRepository.class);
-        csRepo.loadAll();
-
         IConfigRepository cRepo = injector.getInstance(IConfigRepository.class);
         cRepo.load();
+
+        ILocalizationRepository lRepo = injector.getInstance(ILocalizationRepository.class);
+        lRepo.load(cRepo.GetInstance().getLocalization());
+
+        ICityStateRepository csRepo = injector.getInstance(ICityStateRepository.class);
+        csRepo.loadAll();
     }
 
     @Override

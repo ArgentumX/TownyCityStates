@@ -1,4 +1,4 @@
-package com.argemtum.townyCityStates.config;
+package com.argemtum.townyCityStates.config.settings;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -8,7 +8,7 @@ public class ConfigUtils {
     */
     public static void setDefaultFields(YamlConfiguration configuration){
         for (ConfigNode node : ConfigNode.values()) {
-            configuration.set(node.getPath(), node.getDefaultValue());
+            configuration.set(node.getKey(), node.getDefaultValue());
         }
     }
 
@@ -18,8 +18,8 @@ public class ConfigUtils {
     public static boolean updateConfigIfNeeded(YamlConfiguration oldConfiguration){
         boolean modified = false;
         for (ConfigNode node : ConfigNode.values()) {
-            if (!oldConfiguration.contains(node.getPath())) {
-                oldConfiguration.set(node.getPath(), node.getDefaultValue());
+            if (!oldConfiguration.contains(node.getKey())) {
+                oldConfiguration.set(node.getKey(), node.getDefaultValue());
                 modified = true;
             }
         }

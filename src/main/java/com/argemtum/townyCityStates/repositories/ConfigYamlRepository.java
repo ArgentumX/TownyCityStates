@@ -1,25 +1,24 @@
 package com.argemtum.townyCityStates.repositories;
 
 import com.argemtum.townyCityStates.TownyCityStates;
-import com.argemtum.townyCityStates.config.ConfigUtils;
-import com.argemtum.townyCityStates.config.TownyCityStatesSettings;
-import com.argemtum.townyCityStates.factories.ConfigFactory;
+import com.argemtum.townyCityStates.config.settings.ConfigUtils;
+import com.argemtum.townyCityStates.config.settings.TownyCityStatesSettings;
+import com.argemtum.townyCityStates.factories.abstraction.IConfigFactory;
 import com.argemtum.townyCityStates.repositories.abstraction.IConfigRepository;
 import com.google.inject.Inject;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
 
 public class ConfigYamlRepository implements IConfigRepository {
-    private final ConfigFactory configFactory;
+    private final IConfigFactory configFactory;
     private final TownyCityStates plugin; // Добавляем инъекцию плагина для доступа к dataFolder
     private TownyCityStatesSettings settings;
-    private File configFile;
+    private final File configFile;
 
     @Inject
-    public ConfigYamlRepository(ConfigFactory configFactory, TownyCityStates plugin){
+    public ConfigYamlRepository(IConfigFactory configFactory, TownyCityStates plugin){
         this.configFactory = configFactory;
         this.plugin = plugin;
         this.configFile = new File(plugin.getDataFolder(), "settings.yml");

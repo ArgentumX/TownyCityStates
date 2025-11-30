@@ -1,22 +1,24 @@
-package com.argemtum.townyCityStates.config;
+package com.argemtum.townyCityStates.config.settings;
 
-public enum ConfigNode {
+import com.argemtum.townyCityStates.config.INode;
+
+public enum ConfigNode implements INode {
 
     LANGUAGE(
             "language.language",
             "en-US.yml"
     );
 
-    private final String Path;
+    private final String Key;
     private final String DefaultValue;
 
      ConfigNode(String root, String defaultVal) {
-        this.Path = root;
+        this.Key = root;
         this.DefaultValue = defaultVal;
     }
 
-    public String getPath() {
-        return Path;
+    public String getKey() {
+        return Key;
     }
 
     public String getDefaultValue() {

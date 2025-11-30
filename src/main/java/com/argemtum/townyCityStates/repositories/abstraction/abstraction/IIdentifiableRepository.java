@@ -1,4 +1,4 @@
-package com.argemtum.townyCityStates.repositories.abstraction;
+package com.argemtum.townyCityStates.repositories.abstraction.abstraction;
 
 import java.util.Collection;
 import java.util.Optional;

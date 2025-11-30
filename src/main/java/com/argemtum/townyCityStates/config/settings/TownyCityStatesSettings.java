@@ -1,6 +1,5 @@
-package com.argemtum.townyCityStates.config;
+package com.argemtum.townyCityStates.config.settings;
 
-import com.argemtum.townyCityStates.TownyCityStates;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 public class TownyCityStatesSettings {
@@ -12,5 +11,9 @@ public class TownyCityStatesSettings {
 
     public YamlConfiguration getConfig(){
         return this.config;
+    }
+
+    public String getLocalization(){
+        return config.getString(ConfigNode.LANGUAGE.getKey());
     }
 }
