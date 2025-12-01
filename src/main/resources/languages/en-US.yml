@@ -1,2 +1,12 @@
-CITY_STATE_CREATED: City %s created
-NO_PERMISSIONS: You don't have permission to use this command.
+PLUGIN_PREFIX: "§8[§dTownyCityStates§8] §f"
+CITY_CREATED: "City %s created successfully!"
+NO_PERMISSIONS: "You don't have permission to use this command."
+RELOAD_SETTINGS: "Config loaded from file."
+RELOAD_LOCALIZATION: "Localization %s loaded from file."
+RELOAD_CITIES: "Loaded %d cities."
+REGION_NOT_FOUND: "The specified region does not exist."
+CITY_ALREADY_EXISTS: "A city with that name already exists."
+REGION_ALREADY_EXISTS: "A region with that name already exists."
+NOT_PLAYER: "This command can only be executed by a player."
+MUST_BE_NUM: "The value must be a valid number."
+MUST_BE_POSITIVE: "The value must be a positive number."

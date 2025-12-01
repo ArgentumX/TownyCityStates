@@ -43,5 +43,6 @@ public class LocalizationRepository implements ILocalizationRepository{
             throw new RuntimeException("Failed to load YAML configuration for language: " + path, e);
         }
         this.localization = new Localization(config);
+        plugin.getLogger().info(String.format("Localization %s loaded from file.", path));
     }
 }

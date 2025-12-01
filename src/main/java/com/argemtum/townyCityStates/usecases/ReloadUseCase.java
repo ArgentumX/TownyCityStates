@@ -21,11 +21,16 @@ public class ReloadUseCase {
         configRepository.load();
     }
 
-    public void ReloadLocalization(){
-        localizationRepositor.load(configRepository.GetInstance().getLocalization());
+    // Returns loaded localization
+    public String ReloadLocalization(){
+        String selectedLocale = configRepository.GetInstance().getLocalization();
+        localizationRepositor.load(selectedLocale);
+        return selectedLocale;
     }
 
-    public void ReloadCities(){
+    // Return loaded cities amount
+    public int ReloadCities(){
         cityStateRepository.loadAll();
+        return cityStateRepository.getAll().size();
     }
 }

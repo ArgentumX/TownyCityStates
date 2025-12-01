@@ -43,6 +43,7 @@ public class CityStateYamlRepository implements ICityStateRepository {
                 files.filter(path -> path.toString().endsWith(".yml"))
                         .forEach(this::loadFromFile);
             }
+            plugin.getLogger().info(String.format("Loaded %d cities.", cityStates.size()));
         } catch (IOException e) {
             plugin.getLogger().severe("Failed to load city states: " + e.getMessage());
         }
@@ -61,6 +62,13 @@ public class CityStateYamlRepository implements ICityStateRepository {
     @Override
     public Optional<CityState> get(UUID id) {
         return Optional.ofNullable(cityStates.get(id));
+    }
+
+    @Override
+    public Optional<CityState> getByName(String name) {
+        return cityStates.values().stream()
+                .filter(city -> city.getName().equals(name))
+                .findFirst();
     }
 
     @Override

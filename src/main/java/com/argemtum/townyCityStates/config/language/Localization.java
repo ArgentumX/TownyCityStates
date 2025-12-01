@@ -10,12 +10,15 @@ public class Localization {
     }
 
     public String of(MessageNode type) {
-        return config.getString(type.getKey());
+        return getPrefix() + config.getString(type.getKey());
     }
 
     public String of(MessageNode type, Object... args) {
-        String message = of(type);
-        return String.format(message, args);
+        return String.format(of(type), args);
+    }
+
+    public String getPrefix(){
+        return config.getString(MessageNode.PLUGIN_PREFIX.getKey());
     }
 
     private void validateKeys() {
