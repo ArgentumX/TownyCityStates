@@ -1,17 +1,19 @@
 package com.argemtum.townyCityStates.commands;
 
 import com.argemtum.townyCityStates.commands.abstraction.BaseCommand;
+import com.argemtum.townyCityStates.commands.abstraction.CommandObject;
 import com.argemtum.townyCityStates.config.language.Localization;
 import com.argemtum.townyCityStates.config.language.MessageNode;
+import com.argemtum.townyCityStates.controllers.services.CityStateService;
+import com.argemtum.townyCityStates.controllers.usecases.CreateCityStateUseCase;
+import com.argemtum.townyCityStates.controllers.usecases.ReloadUseCase;
 import com.argemtum.townyCityStates.exceptions.absctraction.CityStatesException;
+import com.argemtum.townyCityStates.objects.city.CityState;
 import com.argemtum.townyCityStates.repositories.abstraction.ILocalizationRepository;
-import com.argemtum.townyCityStates.usecases.CreateCityStateUseCase;
-import com.argemtum.townyCityStates.usecases.ReloadUseCase;
 import com.google.inject.Inject;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
+import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.object.Town;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,76 +23,113 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TownyCityStatesAdminCommand extends BaseCommand implements CommandExecutor, TabCompleter {
+public class TownyCityStatesAdminCommand extends BaseCommand {
 
-    private ReloadUseCase reloadUseCase;
-    private CreateCityStateUseCase createUseCase;
-    private Localization localization;
+    private final ReloadUseCase reloadUseCase;
+    private final CreateCityStateUseCase createUseCase;
+    private final Localization localization;
+    private final CityStateService cityStateService;
 
     @Inject
     public TownyCityStatesAdminCommand(
-        ReloadUseCase reloadUseCase,
-        CreateCityStateUseCase createUseCase,
-        ILocalizationRepository localizationRepository
-    ){
+            ReloadUseCase reloadUseCase,
+            CreateCityStateUseCase createUseCase,
+            ILocalizationRepository localizationRepository,
+            CityStateService cityStateService
+    ) {
         this.reloadUseCase = reloadUseCase;
         this.createUseCase = createUseCase;
         this.localization = localizationRepository.GetInstance();
+        this.cityStateService = cityStateService;
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
+    protected boolean handleCommand(@NotNull CommandObject command) {
+        CommandSender sender = command.getSender();
+        String[] args = command.getArgs();
+
         if (!sender.hasPermission("tcs.admin") && !sender.isOp()) {
             sender.sendMessage(localization.of(MessageNode.NO_PERMISSIONS));
             return true;
         }
+
         try {
-            if (args.length > 0) {
-                String arg0 = args[0].toLowerCase();
-                switch (arg0) {
-                    case "reload":
-                        return parseReload(sender, command, label, args);
-                    case "create":
-                        return parseCreate(sender, command, label, args);
-                    default:
-                        return false;
-                }
+            if (args.length == 0) {
+                return false;
             }
-            return false;
-        }
-        catch (CityStatesException exception){
+
+            String arg0 = args[0].toLowerCase();
+            return switch (arg0) {
+                case "reload" -> parseReload(sender, args);
+                case "create" -> parseCreate(sender, args);
+                case "city" -> parseCity(sender, args);
+                default -> false;
+            };
+        } catch (CityStatesException exception) {
             sendMessageIfPlayer(sender, exception.getMessage());
             return true;
         }
     }
 
-    private boolean parseReload(CommandSender sender, Command command, String label, String[] args){
-        if (args.length == 2) {
-            String arg1 = args[1].toLowerCase();
-            return switch (arg1) {
-                case "settings" -> {
-                    reloadUseCase.ReloadSettings();
-                    sendMessageIfPlayer(sender, localization.of(MessageNode.RELOAD_SETTINGS));
-                    yield true;
-                }
-                case "cities" -> {
-                    int citiesAmount = reloadUseCase.ReloadCities();
-                    sendMessageIfPlayer(sender, localization.of(MessageNode.RELOAD_CITIES, citiesAmount));
-                    yield true;
-                }
-                case "language" -> {
-                    String language = reloadUseCase.ReloadLocalization();
-                    sendMessageIfPlayer(sender, localization.of(MessageNode.RELOAD_LOCALIZATION, language));
-                    yield true;
-                }
-                default -> false;
+    @Override
+    protected @Nullable List<String> handleTabComplete(@NotNull CommandObject command) {
+        String[] args = command.getArgs();
+        int length = args.length;
+
+        if (length == 1) {
+            return filterCompletions(args[0], List.of("create", "reload", "city"));
+        } else if (length == 2) {
+            return switch (args[0].toLowerCase()) {
+                case "reload" -> filterCompletions(args[1], List.of("settings", "cities", "language"));
+                case "city" -> filterCompletions(args[1], getCityStateNames());
+                default -> Collections.emptyList();
             };
+        } else if (length == 3) {
+            return switch (args[0].toLowerCase()) {
+                case "create" -> List.of("autoregion");
+                case "city" -> List.of("set");
+                default -> Collections.emptyList();
+            };
+        } else if (length == 4) {
+            return switch (args[2].toLowerCase()) {
+                case "autoregion" -> NumbersTabComplete;
+                case "set" -> List.of("overlord");
+                default -> Collections.emptyList();
+            };
+        } else if (length == 5 && "set".equals(args[2].toLowerCase()) && "overlord".equals(args[3].toLowerCase())) {
+            return filterCompletions(args[4], getTownNames());
         }
-        return false;
+
+        return Collections.emptyList();
     }
 
-    private boolean parseCreate(CommandSender sender, Command command, String label, String[] args) throws CityStatesException {
+    private boolean parseReload(CommandSender sender, String[] args) {
+        if (args.length != 2) return false;
+
+        return switch (args[1].toLowerCase()) {
+            case "settings" -> {
+                reloadUseCase.ReloadSettings();
+                sendMessageIfPlayer(sender, localization.of(MessageNode.RELOAD_SETTINGS));
+                yield true;
+            }
+            case "cities" -> {
+                int citiesAmount = reloadUseCase.ReloadCities();
+                sendMessageIfPlayer(sender, localization.of(MessageNode.RELOAD_CITIES, citiesAmount));
+                yield true;
+            }
+            case "language" -> {
+                String language = reloadUseCase.ReloadLocalization();
+                sendMessageIfPlayer(sender, localization.of(MessageNode.RELOAD_LOCALIZATION, language));
+                yield true;
+            }
+            default -> false;
+        };
+    }
+
+    private boolean parseCreate(CommandSender sender, String[] args) throws CityStatesException {
+        if (args.length < 2) return false;
         String cityName = args[1];
+
         if (args.length == 2) {
             createUseCase.createCityState(cityName);
             sender.sendMessage(localization.of(MessageNode.CITY_CREATED, cityName));
@@ -107,8 +146,7 @@ public class TownyCityStatesAdminCommand extends BaseCommand implements CommandE
             createUseCase.createCityStateWithExistingRegion(player, cityName, regionName);
             sender.sendMessage(localization.of(MessageNode.CITY_CREATED, cityName));
             return true;
-        }
-        else if (args.length == 4 && args[2].equalsIgnoreCase("autoregion")) {
+        } else if (args.length == 4 && "autoregion".equalsIgnoreCase(args[2])) {
             try {
                 int radius = Integer.parseInt(args[3]);
                 if (radius < 0) {
@@ -123,34 +161,45 @@ public class TownyCityStatesAdminCommand extends BaseCommand implements CommandE
                 return true;
             }
         }
-        return true;
+        return false;
     }
 
-    @Override
-    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
-        int length = args.length;
-        if (length == 1) {
-            return filterCompletions(args[0], Arrays.asList("create", "reload"));
-        }
-        else if (length == 2) {
-            switch (args[0].toLowerCase()) {
-                case "create":
-                    return Collections.emptyList(); // Имя города не предлагаем
-                case "reload":
-                    return filterCompletions(args[1], Arrays.asList("settings", "cities", "language"));
-                default:
-                    return Collections.emptyList();
+    private boolean parseCity(CommandSender sender, String[] args) throws CityStatesException {
+        if (args.length < 3) return false;
+        String subCommand = args[2].toLowerCase();
+
+        return switch (subCommand) {
+            case "set" -> parseCitySet(sender, args);
+            default -> false;
+        };
+    }
+
+    private boolean parseCitySet(CommandSender sender, String[] args) throws CityStatesException {
+        if (args.length != 5) return false;
+        String csName = args[1];
+        String field = args[3].toLowerCase();
+        String value = args[4];
+
+        return switch (field) {
+            case "overlord" -> {
+                cityStateService.SetCityStateOverlord(csName, value);
+                sender.sendMessage(localization.of(MessageNode.SET_CITY_OVERLORD, csName, value));
+                yield true;
             }
-        }
-        if (length == 3 && args[0].equalsIgnoreCase("create")) {
-            return filterCompletions(args[2], List.of("autoregion"));
-        }
+            default -> false;
+        };
+    }
 
-        if (length == 4 && args[0].equalsIgnoreCase("create") && args[2].equalsIgnoreCase("autoregion")) {
-            return NumbersTabComplete;
-        }
+    private List<String> getCityStateNames() {
+        return cityStateService.getCityStates().stream()
+                .map(CityState::getName)
+                .collect(Collectors.toList());
+    }
 
-        return Collections.emptyList();
+    private List<String> getTownNames() {
+        return TownyAPI.getInstance().getTowns().stream()
+                .map(Town::getName)
+                .collect(Collectors.toList());
     }
 
     private List<String> filterCompletions(String currentArg, List<String> completions) {

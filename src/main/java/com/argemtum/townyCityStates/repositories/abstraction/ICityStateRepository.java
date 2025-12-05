@@ -1,6 +1,6 @@
 package com.argemtum.townyCityStates.repositories.abstraction;
 
-import com.argemtum.townyCityStates.objects.CityState;
+import com.argemtum.townyCityStates.objects.city.CityState;
 import com.argemtum.townyCityStates.repositories.abstraction.abstraction.IIdentifiableRepository;
 
 import java.util.Optional;

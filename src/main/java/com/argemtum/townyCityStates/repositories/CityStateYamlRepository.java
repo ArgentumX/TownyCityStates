@@ -1,37 +1,36 @@
 package com.argemtum.townyCityStates.repositories;
 
 import com.argemtum.townyCityStates.TownyCityStates;
-import com.argemtum.townyCityStates.objects.CityState;
+import com.argemtum.townyCityStates.objects.city.CityState;
 import com.argemtum.townyCityStates.repositories.abstraction.ICityStateRepository;
 import com.google.inject.Inject;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.loader.ConfigurationLoader;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Stream;
 
+
 public class CityStateYamlRepository implements ICityStateRepository {
+
     private final Path cityStatesDir;
     private final Map<UUID, CityState> cityStates = new HashMap<>();
-    private final Yaml yaml;
     private final TownyCityStates plugin;
 
     @Inject
     public CityStateYamlRepository(TownyCityStates plugin) {
         this.plugin = plugin;
         this.cityStatesDir = plugin.getDataFolder().toPath().resolve("cityStates");
-        this.yaml = createYaml();
     }
 
-    private Yaml createYaml() {
-        DumperOptions options = new DumperOptions();
-        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        return new Yaml(options);
+    private ConfigurationLoader<CommentedConfigurationNode> createLoader(Path file) {
+        return YamlConfigurationLoader.builder()
+                .path(file)
+                .build();
     }
 
     @Override
@@ -40,7 +39,7 @@ public class CityStateYamlRepository implements ICityStateRepository {
         try {
             Files.createDirectories(cityStatesDir);
             try (Stream<Path> files = Files.list(cityStatesDir)) {
-                files.filter(path -> path.toString().endsWith(".yml"))
+                files.filter(path -> path.toString().endsWith(".yml") || path.toString().endsWith(".yaml"))
                         .forEach(this::loadFromFile);
             }
             plugin.getLogger().info(String.format("Loaded %d cities.", cityStates.size()));
@@ -50,12 +49,15 @@ public class CityStateYamlRepository implements ICityStateRepository {
     }
 
     private void loadFromFile(Path file) {
-        try (Reader reader = Files.newBufferedReader(file)) {
-            Map<String, Object> data = yaml.load(reader);
-            CityState city = CityState.fromMap(data);
+        try {
+            ConfigurationLoader<CommentedConfigurationNode> loader = createLoader(file);
+            CommentedConfigurationNode root = loader.load();
+            CityState city = root.get(CityState.class);
+            assert city != null;
+            city.init();
             cityStates.put(city.getId(), city);
         } catch (Exception e) {
-            plugin.getLogger().warning("Error loading " + file.getFileName() + ": " + e.getMessage());
+            plugin.getLogger().severe("Error loading " + file.getFileName() + ": " + e.getMessage());
         }
     }
 
@@ -86,10 +88,12 @@ public class CityStateYamlRepository implements ICityStateRepository {
         Path file = cityStatesDir.resolve(city.getName() + ".yml");
         try {
             Files.createDirectories(cityStatesDir);
-            try (Writer writer = Files.newBufferedWriter(file)) {
-                yaml.dump(city.toMap(), writer);
-            }
-        } catch (IOException e) {
+
+            ConfigurationLoader<CommentedConfigurationNode> loader = createLoader(file);
+            CommentedConfigurationNode root = loader.createNode();
+            root.set(city);
+            loader.save(root);
+        } catch (Exception e) {
             plugin.getLogger().severe("Failed to save " + file.getFileName() + ": " + e.getMessage());
         }
     }
