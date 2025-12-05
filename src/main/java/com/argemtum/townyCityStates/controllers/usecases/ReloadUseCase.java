@@ -1,4 +1,4 @@
-package com.argemtum.townyCityStates.usecases;
+package com.argemtum.townyCityStates.controllers.usecases;
 
 import com.argemtum.townyCityStates.repositories.abstraction.ICityStateRepository;
 import com.argemtum.townyCityStates.repositories.abstraction.IConfigRepository;

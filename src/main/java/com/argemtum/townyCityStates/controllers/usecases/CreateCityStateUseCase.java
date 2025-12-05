@@ -1,10 +1,10 @@
-package com.argemtum.townyCityStates.usecases;
+package com.argemtum.townyCityStates.controllers.usecases;
 
 import com.argemtum.townyCityStates.adapters.WorldGuardAdapter;
 import com.argemtum.townyCityStates.config.language.Localization;
 import com.argemtum.townyCityStates.config.language.MessageNode;
 import com.argemtum.townyCityStates.exceptions.absctraction.CityStatesException;
-import com.argemtum.townyCityStates.objects.CityState;
+import com.argemtum.townyCityStates.objects.city.CityState;
 import com.argemtum.townyCityStates.repositories.abstraction.ICityStateRepository;
 import com.argemtum.townyCityStates.repositories.abstraction.ILocalizationRepository;
 import com.google.inject.Inject;

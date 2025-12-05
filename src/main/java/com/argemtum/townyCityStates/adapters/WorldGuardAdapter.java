@@ -12,7 +12,7 @@ import javax.inject.Inject;
 
 public class WorldGuardAdapter {
     private final WorldGuard worldGuard;
-    private final int CHUNK_SIZE = 16;
+
     @Inject
     public WorldGuardAdapter() {
         this.worldGuard = WorldGuard.getInstance();
@@ -35,6 +35,7 @@ public class WorldGuardAdapter {
     }
 
     public void createChunkCubeRegion(World world, String regionNameId, int centerX, int centerZ, int radius){
+        int CHUNK_SIZE = 16;
         int minX = (centerX - radius) * CHUNK_SIZE;
         int minZ = (centerZ - radius) * CHUNK_SIZE;
         BlockVector3 minBlock = BlockVector3.at(minX, world.getMinHeight(), minZ);

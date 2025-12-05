@@ -8,7 +8,13 @@ commands:
   tcs_admin:
     aliases: [tcsa]
     description: towny city states admin command
+  tcs:
+    aliases: [townycitystates]
+    description: towny city states command
 permissions:
   tcs.admin:
     description: User is able to use /tcs_admin
     default: false
+  tcs.user:
+    description: allows default user commands
+    default: true

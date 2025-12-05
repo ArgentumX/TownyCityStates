@@ -1,14 +1,13 @@
 package com.argemtum.townyCityStates;
 
 import com.argemtum.townyCityStates.commands.TownyCityStatesAdminCommand;
+import com.argemtum.townyCityStates.commands.TownyCityStatesCommand;
 import com.argemtum.townyCityStates.di.PluginModule;
-import com.argemtum.townyCityStates.objects.CityState;
 import com.argemtum.townyCityStates.repositories.abstraction.ICityStateRepository;
 import com.argemtum.townyCityStates.repositories.abstraction.IConfigRepository;
 import com.argemtum.townyCityStates.repositories.abstraction.ILocalizationRepository;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -39,6 +38,12 @@ public final class TownyCityStates extends JavaPlugin {
         PluginCommand tcsAdminCommand = getCommand("tcs_admin");
         tcsAdminCommand.setExecutor(tcsAdminExecutor);
         tcsAdminCommand.setTabCompleter(tcsAdminExecutor);
+
+        //tcs
+        TownyCityStatesCommand tcsExecutor = injector.getInstance(TownyCityStatesCommand.class);
+        PluginCommand tcsCommand = getCommand("tcs");
+        tcsCommand.setExecutor(tcsExecutor);
+        tcsCommand.setTabCompleter(tcsExecutor);
     }
 
     @Override
