@@ -33,4 +33,8 @@ public class CityStateService {
     public List<CityState> getCityStates(){
         return cityStateRepository.getAll().stream().toList();
     }
+
+    public CityState getCityState(String name){
+        return cityStateRepository.getByName(name).orElse(null);
+    }
 }

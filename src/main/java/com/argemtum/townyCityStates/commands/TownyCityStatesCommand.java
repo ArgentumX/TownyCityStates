@@ -1,67 +1,40 @@
 package com.argemtum.townyCityStates.commands;
 
-import com.argemtum.townyCityStates.commands.abstraction.BaseCommand;
-import com.argemtum.townyCityStates.commands.abstraction.CommandObject;
+import co.aikar.commands.annotation.*;
+import com.argemtum.townyCityStates.TownyCityStates;
 import com.argemtum.townyCityStates.config.language.Localization;
 import com.argemtum.townyCityStates.config.language.MessageNode;
 import com.argemtum.townyCityStates.objects.city.CityState;
 import com.argemtum.townyCityStates.repositories.abstraction.ILocalizationRepository;
 import com.argemtum.townyCityStates.controllers.usecases.CityStateInfoUseCase;
 import com.google.inject.Inject;
-import org.bukkit.command.CommandSender;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.bukkit.entity.Player;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
+@CommandAlias("tcs|townycitystates")
+@CommandPermission("tcs.user")
 public class TownyCityStatesCommand extends BaseCommand {
     private final Localization localization;
     private final CityStateInfoUseCase cityStateInfoUseCase;
 
     @Inject
     public TownyCityStatesCommand(
+            TownyCityStates plugin,
             ILocalizationRepository localizationRepository,
             CityStateInfoUseCase cityStateInfoUseCase
     ){
+        super(plugin);
         this.localization = localizationRepository.GetInstance();
         this.cityStateInfoUseCase = cityStateInfoUseCase;
     }
 
-    @Override
-    protected boolean handleCommand(@NotNull CommandObject command) {
-        CommandSender sender = command.getSender();
-        String[] args = command.getArgs();
-
-        if (!sender.hasPermission("tcs.user")) {
-            sender.sendMessage(localization.of(MessageNode.NO_PERMISSIONS));
-            return true;
-        }
-
-        if (!isPlayer(sender)) {
-            // TODO only for players
-            return true;
-        }
-
-        try {
-            if (args.length > 0) {
-                String arg0 = args[0].toLowerCase();
-                return switch (arg0) {
-                    case "list" -> parseList(sender, args);
-                    default -> false;
-                };
-            }
-            return false;
-        }
-        catch (Exception exception) {
-            // TODO logger
-            return true;
-        }
+    @Default
+    public void onDefault(Player sender) {
+        sender.sendMessage(localization.of(MessageNode.NO_PERMISSIONS));
     }
 
-    private boolean parseList(CommandSender sender, String[] args) {
-        List<CityState> cities = cityStateInfoUseCase.getCityStates();
+    @Subcommand("list")
+    public void onList(Player sender) {
+        var cities = cityStateInfoUseCase.getCityStates();
         String header = localization.of(MessageNode.CITY_LIST_HEADER);
         sender.sendMessage(header);
         if (cities.isEmpty()) {
@@ -73,26 +46,5 @@ public class TownyCityStatesCommand extends BaseCommand {
                 sender.sendMessage(line);
             }
         }
-        return true;
-    }
-
-    @Override
-    protected @Nullable List<String> handleTabComplete(@NotNull CommandObject command) {
-        String[] args = command.getArgs();
-
-        if (args.length == 1) {
-            return filterCompletions(args[0], Collections.singletonList("list"));
-        }
-        return Collections.emptyList();
-    }
-
-    private List<String> filterCompletions(String currentArg, List<String> completions) {
-        if (currentArg.isEmpty()) return completions;
-
-        String lowerArg = currentArg.toLowerCase();
-        return completions.stream()
-                .filter(s -> s.toLowerCase().startsWith(lowerArg))
-                .sorted()
-                .collect(Collectors.toList());
     }
 }
