@@ -1,5 +1,6 @@
 package com.argemtum.townyCityStates.commands;
 
+import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
 import com.argemtum.townyCityStates.TownyCityStates;
 import com.argemtum.townyCityStates.config.language.Localization;
@@ -22,7 +23,6 @@ public class TownyCityStatesCommand extends BaseCommand {
             ILocalizationRepository localizationRepository,
             CityStateInfoUseCase cityStateInfoUseCase
     ){
-        super(plugin);
         this.localization = localizationRepository.GetInstance();
         this.cityStateInfoUseCase = cityStateInfoUseCase;
     }

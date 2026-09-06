@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "minecraft-bot": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "github:yuniko-software/minecraft-mcp-server",
+        "--host",
+        "localhost",
+        "--port",
+        "25565",
+        "--username",
+        "ClaudeBot"
+      ],
+      "env": {}
+    }
+  }
+}

@@ -1,14 +1,19 @@
 package com.argemtum.townyCityStates;
 
+import co.aikar.commands.PaperCommandManager;
 import com.argemtum.townyCityStates.commands.TownyCityStatesAdminCommand;
 import com.argemtum.townyCityStates.commands.TownyCityStatesCommand;
+import com.argemtum.townyCityStates.controllers.services.CityStateService;
 import com.argemtum.townyCityStates.di.PluginModule;
+import com.argemtum.townyCityStates.objects.city.CityState;
 import com.argemtum.townyCityStates.repositories.abstraction.ICityStateRepository;
 import com.argemtum.townyCityStates.repositories.abstraction.IConfigRepository;
 import com.argemtum.townyCityStates.repositories.abstraction.ILocalizationRepository;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.stream.Collectors;
 
 public final class TownyCityStates extends JavaPlugin {
     private Injector injector;
@@ -30,11 +35,17 @@ public final class TownyCityStates extends JavaPlugin {
     }
 
     private void registerCommands(){
-        TownyCityStatesAdminCommand tcsAdminCommand = injector.getInstance(TownyCityStatesAdminCommand.class);
-        tcsAdminCommand.register();
+        PaperCommandManager manager = new PaperCommandManager(this);
 
-        TownyCityStatesCommand tcsCommand = injector.getInstance(TownyCityStatesCommand.class);
-        tcsCommand.register();
+        CityStateService cityStateService = injector.getInstance(CityStateService.class);
+        manager.getCommandCompletions().registerAsyncCompletion("city-states", context ->
+                cityStateService.getCityStates().stream()
+                        .map(CityState::getName)
+                        .collect(Collectors.toList())
+        );
+
+        manager.registerCommand(injector.getInstance(TownyCityStatesAdminCommand.class));
+        manager.registerCommand(injector.getInstance(TownyCityStatesCommand.class));
     }
 
     @Override

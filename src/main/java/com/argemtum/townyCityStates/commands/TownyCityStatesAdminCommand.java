@@ -1,7 +1,9 @@
 package com.argemtum.townyCityStates.commands;
 
+import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
 import co.aikar.commands.InvalidCommandArgument;
+import com.argemtum.townyCityStates.TownyCityStates;
 import com.argemtum.townyCityStates.config.language.Localization;
 import com.argemtum.townyCityStates.config.language.MessageNode;
 import com.argemtum.townyCityStates.controllers.services.CityStateService;
@@ -14,9 +16,6 @@ import com.google.inject.Inject;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
 import org.bukkit.entity.Player;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @CommandAlias("tcs_admin|tcsa")
 @CommandPermission("tcs.admin")
@@ -35,7 +34,6 @@ public class TownyCityStatesAdminCommand extends BaseCommand {
             ILocalizationRepository localizationRepository,
             CityStateService cityStateService
     ) {
-        super(plugin);
         this.reloadUseCase = reloadUseCase;
         this.createUseCase = createUseCase;
         this.localization = localizationRepository.GetInstance();
@@ -84,7 +82,7 @@ public class TownyCityStatesAdminCommand extends BaseCommand {
         sender.sendMessage(localization.of(MessageNode.CITY_CREATED, cityName));
     }
 
-    @Completion("#city-states")
+    @CommandCompletion("@city-states")
     @Subcommand("city set overlord")
     public void onCitySetOverlord(Player sender, @Single String cityName, @Single String townName) throws CityStatesException {
         CityState cityState = cityStateService.getCityState(cityName);
@@ -99,13 +97,6 @@ public class TownyCityStatesAdminCommand extends BaseCommand {
         
         cityStateService.SetCityStateOverlord(cityName, townName);
         sender.sendMessage(localization.of(MessageNode.SET_CITY_OVERLORD, cityName, townName));
-    }
-
-    @CompletionProvider
-    public List<String> getCityStateCompletions(CommandCompletionContext c) {
-        return cityStateService.getCityStates().stream()
-                .map(CityState::getName)
-                .collect(Collectors.toList());
     }
 
     @CatchUnknown
