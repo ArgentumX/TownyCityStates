@@ -16,6 +16,10 @@ public abstract class Influencer {
 
     protected Influencer(){}
 
+    public Influencer(float initialInfluence){
+        this(UUID.randomUUID(), initialInfluence);
+    }
+
     public Influencer(UUID influencerId, float initialInfluence) {
         this.influencerId = influencerId;
         this.influence = initialInfluence;
@@ -40,6 +44,6 @@ public abstract class Influencer {
         if (amount < 0) {
             throw new IllegalArgumentException("Amount must be positive for reduceInfluence");
         }
-        this.influence = Math.max(0, this.influence - amount);
+        this.influence -= amount;
     }
 }

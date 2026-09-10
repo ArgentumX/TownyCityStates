@@ -42,15 +42,19 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
     compileOnly("com.palmergames.bukkit.towny:towny:0.102.0.0")
     compileOnly('com.sk89q.worldguard:worldguard-bukkit:7.0.11')
-    compileOnly('com.sk89q.worldedit:worldedit-bukkit:7.3.6') // Updated to a stable version with known distribution JAR
+    compileOnly('com.sk89q.worldedit:worldedit-bukkit:7.3.6')
+
     implementation 'co.aikar:acf-paper:0.5.1-SNAPSHOT'
     implementation 'com.google.inject:guice:7.0.0'
     implementation("org.spongepowered:configurate-yaml:4.2.0")
+
     // for copying to run/plugins
     townyPlugin("com.palmergames.bukkit.towny:towny:0.102.0.0")
 
+    // tests
     testImplementation(platform('org.junit:junit-bom:5.11.4'))
-    testImplementation('org.junit.jupyter:junit-jupiter')
+    testImplementation('org.junit.jupiter:junit-jupiter')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
     testImplementation('org.mockito:mockito-core:5.14.2')
 }
 
@@ -65,6 +69,12 @@ build {
 }
 test {
     useJUnitPlatform()
+
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams(true)
+        exceptionFormat("full")
+    }
 }
 
 tasks.register("copyTowny", Copy) {
@@ -107,12 +117,7 @@ tasks.named("runServer") {
 
 def targetJavaVersion = 21
 java {
-    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
-    sourceCompatibility = javaVersion
-    targetCompatibility = javaVersion
-    if (JavaVersion.current() < javaVersion) {
-        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
-    }
+    toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
 }
 
 tasks.withType(JavaCompile).configureEach {
